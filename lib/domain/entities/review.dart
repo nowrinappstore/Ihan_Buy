@@ -1,3 +1,4 @@
+// lib/domain/entities/review.dart
 class Review {
   final String productId;
   final String name;

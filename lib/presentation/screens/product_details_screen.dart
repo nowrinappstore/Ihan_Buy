@@ -1,8 +1,11 @@
+// lib/presentation/screens/product_details_screen.dart
 import 'package:flutter/material.dart';
-import '../../core/di/injector.dart';
-import '../../core/theme/app_theme.dart';
+
+import '../../core/app_colors.dart';
+import '../../core/app_navigator.dart';
+import '../../core/app_strings.dart';
 import '../../domain/entities/product.dart';
-import 'reviews_screen.dart';
+import '../state/app_controllers.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   final Product product;
@@ -14,37 +17,44 @@ class ProductDetailsScreen extends StatefulWidget {
 }
 
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
-  late Color _selectedColor =
-      widget.product.colorOptions.isNotEmpty ? widget.product.colorOptions.first : AppColors.primary;
+  late String _selectedColor =
+      widget.product.colorOptions.isNotEmpty ? widget.product.colorOptions.first : '';
   int _selectedSizeIndex = 1;
   int _quantity = 1;
 
-  String get _selectedSize =>
-      widget.product.sizeOptions.isNotEmpty
-          ? widget.product.sizeOptions[_selectedSizeIndex.clamp(0, widget.product.sizeOptions.length - 1)]
-          : '';
+  String get _selectedSize => widget.product.sizeOptions.isNotEmpty
+      ? widget.product.sizeOptions[_selectedSizeIndex.clamp(0, widget.product.sizeOptions.length - 1)]
+      : '';
 
   @override
   Widget build(BuildContext context) {
     final product = widget.product;
     return Scaffold(
-      appBar: AppBar(title: const Text('Product Details')),
+      appBar: AppBar(title: const Text(AppStrings.productDetailsTitle)),
       body: ListView(
         children: [
           Container(
             height: 240,
             width: double.infinity,
-            color: product.color.withValues(alpha: 0.08),
+            color: AppColors.productPlaceholder.withValues(alpha: 0.08),
             child: product.imageUrl != null
                 ? Image.network(
                     product.imageUrl!,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => Center(
-                      child: Icon(product.icon, size: 120, color: product.color),
+                    errorBuilder: (_, _, _) => const Center(
+                      child: Icon(
+                        Icons.image_not_supported_outlined,
+                        size: 64,
+                        color: AppColors.productPlaceholder,
+                      ),
                     ),
                   )
-                : Center(
-                    child: Icon(product.icon, size: 120, color: product.color),
+                : const Center(
+                    child: Icon(
+                      Icons.image_not_supported_outlined,
+                      size: 64,
+                      color: AppColors.productPlaceholder,
+                    ),
                   ),
           ),
           const SizedBox(height: 8),
@@ -92,10 +102,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     Text('${product.rating}'),
                     const SizedBox(width: 12),
                     GestureDetector(
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => ReviewsScreen(product: product)),
+                      onTap: () => AppNavigator.toReviews(context, product: product),
+                      child: const Text(
+                        AppStrings.reviewsTitle,
+                        style: TextStyle(color: AppColors.primary),
                       ),
-                      child: const Text('Reviews', style: TextStyle(color: AppColors.primary)),
                     ),
                     const Spacer(),
                     AnimatedBuilder(
@@ -114,7 +125,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                const Text('Color', style: TextStyle(fontWeight: FontWeight.w600)),
+                const Text(AppStrings.colorLabel, style: TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 10),
                 Row(
                   children: product.colorOptions.map((c) {
@@ -126,7 +137,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         width: 28,
                         height: 28,
                         decoration: BoxDecoration(
-                          color: c,
+                          color: AppColors.swatchFor(c),
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: selected ? AppColors.primary : AppColors.border,
@@ -138,7 +149,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   }).toList(),
                 ),
                 const SizedBox(height: 20),
-                const Text('Size', style: TextStyle(fontWeight: FontWeight.w600)),
+                const Text(AppStrings.sizeLabel, style: TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 10),
                 Row(
                   children: product.sizeOptions.asMap().entries.map((entry) {
@@ -153,7 +164,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         height: 36,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: selected ? AppColors.primary : Colors.white,
+                          color: selected ? AppColors.primary : AppColors.white,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: selected ? AppColors.primary : AppColors.border,
@@ -161,16 +172,19 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         ),
                         child: Text(
                           size,
-                          style: TextStyle(color: selected ? Colors.white : AppColors.textPrimary),
+                          style: TextStyle(color: selected ? AppColors.white : AppColors.textPrimary),
                         ),
                       ),
                     );
                   }).toList(),
                 ),
                 const SizedBox(height: 20),
-                const Text('Description', style: TextStyle(fontWeight: FontWeight.w600)),
+                const Text(AppStrings.descriptionLabel, style: TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
-                Text(product.description, style: const TextStyle(color: AppColors.textSecondary, height: 1.4)),
+                Text(
+                  product.description,
+                  style: const TextStyle(color: AppColors.textSecondary, height: 1.4),
+                ),
               ],
             ),
           ),
@@ -182,7 +196,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           child: Row(
             children: [
               Text(
-                '\$${product.price.toStringAsFixed(0)}',
+                '${AppStrings.currencySymbol}${product.price.toStringAsFixed(0)}',
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const Spacer(),
@@ -204,7 +218,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                               if (!context.mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text(added ? 'Added to cart' : cartController.errorMessage!),
+                                  content: Text(
+                                    added ? AppStrings.addedToCart : cartController.errorMessage!,
+                                  ),
                                 ),
                               );
                             },
@@ -212,9 +228,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           ? const SizedBox(
                               width: 20,
                               height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white),
                             )
-                          : const Text('Add To Cart'),
+                          : const Text(AppStrings.addToCart),
                     );
                   },
                 ),

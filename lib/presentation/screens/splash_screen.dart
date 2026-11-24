@@ -1,9 +1,11 @@
+// lib/presentation/screens/splash_screen.dart
 import 'package:flutter/material.dart';
-import '../../core/di/injector.dart';
-import '../../core/theme/app_theme.dart';
+
+import '../../core/app_colors.dart';
+import '../../core/app_navigator.dart';
+import '../../core/app_strings.dart';
+import '../state/app_controllers.dart';
 import '../widgets/app_logo.dart';
-import 'login_screen.dart';
-import 'main_shell.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -23,15 +25,17 @@ class _SplashScreenState extends State<SplashScreen> {
     final restored = await authController.restoreSession();
     productsController.load();
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => restored ? const MainShell() : const LoginScreen()),
-    );
+    if (restored) {
+      AppNavigator.replaceWithMainShell(context);
+    } else {
+      AppNavigator.replaceWithLogin(context);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -48,7 +52,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             SizedBox(height: 16),
             Text(
-              'Version 1.0',
+              AppStrings.versionLabel,
               style: TextStyle(color: AppColors.textSecondary),
             ),
           ],

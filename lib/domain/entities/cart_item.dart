@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+// lib/domain/entities/cart_item.dart
 import 'product.dart';
 
 class CartItem {
@@ -6,7 +6,7 @@ class CartItem {
   /// server cart. Null only in the instant between creation and sync.
   String? id;
   final Product product;
-  final Color color;
+  final String color;
   final String size;
   int quantity;
 

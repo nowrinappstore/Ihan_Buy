@@ -19,8 +19,6 @@ const _productA = Product(
   price: 10,
   rating: 4.5,
   categoryName: 'Test',
-  icon: Icons.ac_unit,
-  color: Colors.blue,
 );
 
 const _productB = Product(
@@ -29,8 +27,6 @@ const _productB = Product(
   price: 20,
   rating: 4.0,
   categoryName: 'Test',
-  icon: Icons.ac_unit,
-  color: Colors.blue,
 );
 
 void main() {

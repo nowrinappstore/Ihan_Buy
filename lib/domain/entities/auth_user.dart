@@ -1,3 +1,4 @@
+// lib/domain/entities/auth_user.dart
 class AuthUser {
   final String? id;
   final String email;
@@ -16,30 +17,6 @@ class AuthUser {
     this.city,
     this.address,
   });
-
-  factory AuthUser.fromJson(Map<String, dynamic> json) {
-    return AuthUser(
-      id: json['_id']?.toString(),
-      email: json['email']?.toString() ?? '',
-      firstName: json['first_name']?.toString(),
-      lastName: json['last_name']?.toString(),
-      phone: json['phone']?.toString(),
-      city: json['city']?.toString(),
-      address: json['address']?.toString(),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      '_id': id,
-      'email': email,
-      'first_name': firstName,
-      'last_name': lastName,
-      'phone': phone,
-      'city': city,
-      'address': address,
-    };
-  }
 
   AuthUser copyWith({
     String? firstName,

@@ -1,8 +1,11 @@
+// lib/presentation/screens/reviews_screen.dart
 import 'package:flutter/material.dart';
-import '../../core/di/injector.dart';
-import '../../core/theme/app_theme.dart';
+
+import '../../core/app_colors.dart';
+import '../../core/app_navigator.dart';
+import '../../core/app_strings.dart';
 import '../../domain/entities/product.dart';
-import 'create_review_screen.dart';
+import '../state/app_controllers.dart';
 
 class ReviewsScreen extends StatelessWidget {
   final Product product;
@@ -12,7 +15,7 @@ class ReviewsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Reviews')),
+      appBar: AppBar(title: const Text(AppStrings.reviewsTitle)),
       body: AnimatedBuilder(
         animation: reviewsController,
         builder: (context, _) {
@@ -54,13 +57,14 @@ class ReviewsScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Reviews (${reviews.length})', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    Text(
+                      AppStrings.reviewsCount(reviews.length),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     FloatingActionButton.small(
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => CreateReviewScreen(product: product)),
-                      ),
+                      onPressed: () => AppNavigator.toCreateReview(context, product: product),
                       backgroundColor: AppColors.primary,
-                      child: const Icon(Icons.add, color: Colors.white),
+                      child: const Icon(Icons.add, color: AppColors.white),
                     ),
                   ],
                 ),

@@ -1,7 +1,10 @@
+// lib/presentation/widgets/product_card.dart
 import 'package:flutter/material.dart';
-import '../../core/di/injector.dart';
-import '../../core/theme/app_theme.dart';
+
+import '../../core/app_colors.dart';
+import '../../core/app_strings.dart';
 import '../../domain/entities/product.dart';
+import '../state/app_controllers.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -36,15 +39,22 @@ class ProductCard extends StatelessWidget {
                   child: Container(
                     height: 90,
                     width: double.infinity,
-                    color: product.color.withValues(alpha: 0.08),
+                    color: AppColors.productPlaceholder.withValues(alpha: 0.08),
                     child: product.imageUrl != null
                         ? Image.network(
                             product.imageUrl!,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) =>
-                                Icon(product.icon, size: 48, color: product.color),
+                            errorBuilder: (_, _, _) => const Icon(
+                              Icons.image_not_supported_outlined,
+                              size: 32,
+                              color: AppColors.productPlaceholder,
+                            ),
                           )
-                        : Icon(product.icon, size: 48, color: product.color),
+                        : const Icon(
+                            Icons.image_not_supported_outlined,
+                            size: 32,
+                            color: AppColors.productPlaceholder,
+                          ),
                   ),
                 ),
                 Positioned(
@@ -83,7 +93,7 @@ class ProductCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        '\$${product.price.toStringAsFixed(0)}',
+                        '${AppStrings.currencySymbol}${product.price.toStringAsFixed(0)}',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,

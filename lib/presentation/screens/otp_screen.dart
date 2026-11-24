@@ -1,9 +1,13 @@
+// lib/presentation/screens/otp_screen.dart
 import 'dart:async';
+
 import 'package:flutter/material.dart';
-import '../../core/di/injector.dart';
-import '../../core/theme/app_theme.dart';
+
+import '../../core/app_colors.dart';
+import '../../core/app_navigator.dart';
+import '../../core/app_strings.dart';
+import '../state/app_controllers.dart';
 import '../widgets/app_logo.dart';
-import 'main_shell.dart';
 
 class OtpScreen extends StatefulWidget {
   final String email;
@@ -15,10 +19,12 @@ class OtpScreen extends StatefulWidget {
 }
 
 class _OtpScreenState extends State<OtpScreen> {
+  static const int _otpDurationSeconds = 120;
+
   final List<TextEditingController> _controllers =
       List.generate(4, (_) => TextEditingController());
   final List<FocusNode> _nodes = List.generate(4, (_) => FocusNode());
-  int _secondsLeft = 120;
+  int _secondsLeft = _otpDurationSeconds;
   Timer? _timer;
 
   @override
@@ -40,7 +46,7 @@ class _OtpScreenState extends State<OtpScreen> {
   }
 
   void _startTimer() {
-    _secondsLeft = 120;
+    _secondsLeft = _otpDurationSeconds;
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_secondsLeft == 0) {
@@ -55,7 +61,7 @@ class _OtpScreenState extends State<OtpScreen> {
     final code = _controllers.map((c) => c.text).join();
     if (code.length < 4) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter the full 4-digit code')),
+        const SnackBar(content: Text(AppStrings.errorEnterFullOtpCode)),
       );
       return;
     }
@@ -64,10 +70,7 @@ class _OtpScreenState extends State<OtpScreen> {
     if (!mounted) return;
 
     if (verified) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const MainShell()),
-        (route) => false,
-      );
+      AppNavigator.replaceWithMainShell(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(authController.errorMessage!)),
@@ -83,7 +86,7 @@ class _OtpScreenState extends State<OtpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -93,12 +96,12 @@ class _OtpScreenState extends State<OtpScreen> {
               const AppLogo(size: 56),
               const SizedBox(height: 32),
               const Text(
-                'Enter OTP Code',
+                AppStrings.otpTitle,
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               const Text(
-                'A 4 Digit OTP Code has been Sent',
+                AppStrings.otpSubtitle,
                 style: TextStyle(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 28),
@@ -137,19 +140,19 @@ class _OtpScreenState extends State<OtpScreen> {
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Next'),
+                        : const Text(AppStrings.next),
                   );
                 },
               ),
               const SizedBox(height: 16),
               Text(
-                'This code will expire in $_secondsLeft s',
+                AppStrings.otpExpiresIn(_secondsLeft),
                 style: const TextStyle(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 4),
               TextButton(
                 onPressed: _secondsLeft == 0 ? _handleResend : null,
-                child: const Text('Resend Code'),
+                child: const Text(AppStrings.otpResend),
               ),
             ],
           ),

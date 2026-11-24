@@ -1,5 +1,7 @@
+// lib/presentation/widgets/category_card.dart
 import 'package:flutter/material.dart';
-import '../../core/theme/app_theme.dart';
+
+import '../../core/app_colors.dart';
 import '../../domain/entities/category.dart';
 
 enum CategoryCardStyle { avatar, tile }
@@ -16,20 +18,36 @@ class CategoryCard extends StatelessWidget {
     this.style = CategoryCardStyle.tile,
   });
 
+  static const List<IconData> _fallbackIcons = [
+    Icons.category_outlined,
+    Icons.tv,
+    Icons.ramen_dining,
+    Icons.diamond_outlined,
+    Icons.bed_outlined,
+    Icons.checkroom_outlined,
+    Icons.sports_basketball_outlined,
+    Icons.watch_outlined,
+  ];
+
+  IconData get _icon => _fallbackIcons[category.iconIndex % _fallbackIcons.length];
+
+  Color get _color => AppColors.categoryFallbackColors[
+      category.iconIndex % AppColors.categoryFallbackColors.length];
+
   @override
   Widget build(BuildContext context) {
-    final icon = Icon(category.icon, color: category.color);
+    final icon = Icon(_icon, color: _color);
     final iconContainer = style == CategoryCardStyle.avatar
         ? CircleAvatar(
             radius: 28,
-            backgroundColor: category.color.withValues(alpha: 0.12),
+            backgroundColor: _color.withValues(alpha: 0.12),
             child: icon,
           )
         : Container(
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: AppColors.border),
             ),

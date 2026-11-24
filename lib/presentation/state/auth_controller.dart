@@ -1,44 +1,28 @@
+// lib/presentation/state/auth_controller.dart
 import 'package:flutter/foundation.dart';
 
-import '../../core/network/api_client.dart';
+import '../../core/app_strings.dart';
+import '../../data/service/auth_service.dart';
+import '../../data/service/network/response_wrapper.dart';
 import '../../domain/entities/auth_user.dart';
-import '../../domain/repositories/auth_repository.dart';
-import '../../domain/usecases/login.dart';
-import '../../domain/usecases/send_otp.dart';
-import '../../domain/usecases/signup.dart';
-import '../../domain/usecases/verify_otp.dart';
 
 class AuthController extends ChangeNotifier {
-  final AuthRepository _repository;
-  final Login _login;
-  final Signup _signup;
-  final SendOtp _sendOtp;
-  final VerifyOtp _verifyOtp;
+  final AuthService _service;
 
-  AuthController({
-    required AuthRepository repository,
-    required Login login,
-    required Signup signup,
-    required SendOtp sendOtp,
-    required VerifyOtp verifyOtp,
-  })  : _repository = repository,
-        _login = login,
-        _signup = signup,
-        _sendOtp = sendOtp,
-        _verifyOtp = verifyOtp;
+  AuthController(this._service);
 
   String? _pendingEmail;
   String? _pendingPassword;
   bool isLoading = false;
   String? errorMessage;
 
-  AuthUser? get currentUser => _repository.currentUser;
+  AuthUser? get currentUser => _service.currentUser;
   String? get pendingEmail => _pendingEmail;
 
   /// Call once at startup. Returns true if a persisted session was restored.
   Future<bool> restoreSession() async {
     try {
-      return await _repository.restoreSession();
+      return await _service.restoreSession();
     } catch (_) {
       return false;
     }
@@ -49,13 +33,13 @@ class AuthController extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
     try {
-      await _login(email, password);
+      await _service.login(email, password);
       return true;
     } on ApiException catch (e) {
       errorMessage = e.message;
       return false;
     } catch (_) {
-      errorMessage = 'Could not log in. Please try again.';
+      errorMessage = AppStrings.errorCouldNotLogIn;
       return false;
     } finally {
       isLoading = false;
@@ -76,7 +60,7 @@ class AuthController extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
     try {
-      await _signup(
+      await _service.signup(
         firstName: firstName,
         lastName: lastName,
         email: email,
@@ -92,7 +76,7 @@ class AuthController extends ChangeNotifier {
       errorMessage = e.message;
       return false;
     } catch (_) {
-      errorMessage = 'Could not sign up. Please try again.';
+      errorMessage = AppStrings.errorCouldNotSignUp;
       return false;
     } finally {
       isLoading = false;
@@ -106,13 +90,13 @@ class AuthController extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
     try {
-      await _sendOtp(email);
+      await _service.sendOtp(email);
       return true;
     } on ApiException catch (e) {
       errorMessage = e.message;
       return false;
     } catch (_) {
-      errorMessage = 'Could not send the code. Please try again.';
+      errorMessage = AppStrings.errorCouldNotSendCode;
       return false;
     } finally {
       isLoading = false;
@@ -130,22 +114,22 @@ class AuthController extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
     try {
-      final verified = await _verifyOtp(email, code);
+      final verified = await _service.verifyOtp(email, code);
       if (!verified) {
-        errorMessage = 'Incorrect code. Please try again.';
+        errorMessage = AppStrings.errorIncorrectCode;
         return false;
       }
 
       final password = _pendingPassword;
       if (password != null) {
-        await _login(email, password);
+        await _service.login(email, password);
       }
       return true;
     } on ApiException catch (e) {
       errorMessage = e.message;
       return false;
     } catch (_) {
-      errorMessage = 'Could not verify the code. Please try again.';
+      errorMessage = AppStrings.errorCouldNotVerifyCode;
       return false;
     } finally {
       isLoading = false;
@@ -154,7 +138,7 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await _repository.logout();
+    await _service.logout();
     _pendingEmail = null;
     _pendingPassword = null;
     notifyListeners();

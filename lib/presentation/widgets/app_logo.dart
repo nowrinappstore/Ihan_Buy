@@ -1,5 +1,10 @@
+// lib/presentation/widgets/app_logo.dart
 import 'package:flutter/material.dart';
-import '../../core/theme/app_theme.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+import '../../core/app_assets.dart';
+import '../../core/app_colors.dart';
+import '../../core/app_strings.dart';
 
 class AppLogo extends StatelessWidget {
   final double size;
@@ -11,18 +16,10 @@ class AppLogo extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
+        SvgPicture.asset(
+          size <= 32 ? AppAssets.logoNav : AppAssets.logo,
           width: size,
           height: size,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(size * 0.3),
-            gradient: const LinearGradient(
-              colors: [AppColors.accentPink, AppColors.accentOrange],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: Icon(Icons.shopping_bag, color: Colors.white, size: size * 0.6),
         ),
         const SizedBox(width: 8),
         RichText(
@@ -33,8 +30,8 @@ class AppLogo extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
             children: const [
-              TextSpan(text: 'Ihan'),
-              TextSpan(text: 'Buy', style: TextStyle(color: AppColors.primary)),
+              TextSpan(text: AppStrings.appLogoPart1),
+              TextSpan(text: AppStrings.appLogoPart2, style: TextStyle(color: AppColors.primary)),
             ],
           ),
         ),

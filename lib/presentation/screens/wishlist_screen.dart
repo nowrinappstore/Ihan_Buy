@@ -1,8 +1,11 @@
+// lib/presentation/screens/wishlist_screen.dart
 import 'package:flutter/material.dart';
-import '../../core/di/injector.dart';
-import '../../core/theme/app_theme.dart';
+
+import '../../core/app_colors.dart';
+import '../../core/app_navigator.dart';
+import '../../core/app_strings.dart';
+import '../state/app_controllers.dart';
 import '../widgets/product_card.dart';
-import 'product_details_screen.dart';
 
 class WishlistScreen extends StatelessWidget {
   const WishlistScreen({super.key});
@@ -10,7 +13,7 @@ class WishlistScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Wish List')),
+      appBar: AppBar(title: const Text(AppStrings.wishlistTitle)),
       body: AnimatedBuilder(
         animation: Listenable.merge([cartController, productsController]),
         builder: (context, _) {
@@ -19,7 +22,10 @@ class WishlistScreen extends StatelessWidget {
               .toList();
           if (items.isEmpty) {
             return const Center(
-              child: Text('No items in your wish list', style: TextStyle(color: AppColors.textSecondary)),
+              child: Text(
+                AppStrings.wishlistEmpty,
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             );
           }
           return Padding(
@@ -37,9 +43,7 @@ class WishlistScreen extends StatelessWidget {
                 return ProductCard(
                   product: product,
                   width: double.infinity,
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => ProductDetailsScreen(product: product)),
-                  ),
+                  onTap: () => AppNavigator.toProductDetails(context, product: product),
                 );
               },
             ),

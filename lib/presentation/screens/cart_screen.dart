@@ -1,7 +1,9 @@
+// lib/presentation/screens/cart_screen.dart
 import 'package:flutter/material.dart';
-import '../../core/di/injector.dart';
-import '../../core/theme/app_theme.dart';
-import '../../domain/entities/product.dart';
+
+import '../../core/app_colors.dart';
+import '../../core/app_strings.dart';
+import '../state/app_controllers.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -9,14 +11,17 @@ class CartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Cart')),
+      appBar: AppBar(title: const Text(AppStrings.cartTitle)),
       body: AnimatedBuilder(
         animation: cartController,
         builder: (context, _) {
           final cart = cartController.cart;
           if (cart.isEmpty) {
             return const Center(
-              child: Text('Your cart is empty', style: TextStyle(color: AppColors.textSecondary)),
+              child: Text(
+                AppStrings.cartEmpty,
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             );
           }
           return Column(
@@ -34,25 +39,45 @@ class CartScreen extends StatelessWidget {
                           width: 64,
                           height: 64,
                           decoration: BoxDecoration(
-                            color: item.product.color.withValues(alpha: 0.08),
+                            color: AppColors.productPlaceholder.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Icon(item.product.icon, color: item.product.color),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: item.product.imageUrl != null
+                                ? Image.network(
+                                    item.product.imageUrl!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) => const Icon(
+                                      Icons.image_not_supported_outlined,
+                                      color: AppColors.productPlaceholder,
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.image_not_supported_outlined,
+                                    color: AppColors.productPlaceholder,
+                                  ),
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(item.product.name,
-                                  style: const TextStyle(fontWeight: FontWeight.w600)),
                               Text(
-                                'Color: ${_colorName(item.color)}, Size: ${item.size}',
-                                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                                item.product.name,
+                                style: const TextStyle(fontWeight: FontWeight.w600),
+                              ),
+                              Text(
+                                AppStrings.cartItemColorSize(_colorName(item.color), item.size),
+                                style:
+                                    const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                               ),
                               const SizedBox(height: 4),
-                              Text('\$${item.product.price.toStringAsFixed(0)}',
-                                  style: const TextStyle(fontWeight: FontWeight.bold)),
+                              Text(
+                                '${AppStrings.currencySymbol}${item.product.price.toStringAsFixed(0)}',
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
                             ],
                           ),
                         ),
@@ -96,9 +121,12 @@ class CartScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Total Price', style: TextStyle(color: AppColors.textSecondary)),
+                            const Text(
+                              'Total Price',
+                              style: TextStyle(color: AppColors.textSecondary),
+                            ),
                             Text(
-                              '\$${cartController.cartTotal.toStringAsFixed(2)}',
+                              '${AppStrings.currencySymbol}${cartController.cartTotal.toStringAsFixed(2)}',
                               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                           ],
@@ -123,7 +151,9 @@ class CartScreen extends StatelessWidget {
                                   if (!context.mounted) return;
                                   if (placed) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Order placed successfully')),
+                                      const SnackBar(
+                                        content: Text(AppStrings.orderPlacedSuccessfully),
+                                      ),
                                     );
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -135,9 +165,12 @@ class CartScreen extends StatelessWidget {
                               ? const SizedBox(
                                   width: 20,
                                   height: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.white,
+                                  ),
                                 )
-                              : const Text('Checkout'),
+                              : const Text(AppStrings.checkout),
                         ),
                       ),
                     ],
@@ -151,10 +184,9 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  String _colorName(Color color) {
-    final name = Product.colorName(color);
-    if (name == null) return 'N/A';
-    return name[0].toUpperCase() + name.substring(1);
+  String _colorName(String color) {
+    if (color.isEmpty) return AppStrings.notAvailable;
+    return color[0].toUpperCase() + color.substring(1);
   }
 }
 
@@ -196,7 +228,7 @@ class _ShippingAddressDialogState extends State<_ShippingAddressDialog> {
         _cityController.text.trim().isEmpty ||
         _postalCodeController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all shipping details')),
+        const SnackBar(content: Text(AppStrings.errorFillShippingDetails)),
       );
       return;
     }
@@ -213,37 +245,37 @@ class _ShippingAddressDialogState extends State<_ShippingAddressDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Shipping Details'),
+      title: const Text(AppStrings.shippingDetailsTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: _fullNameController,
-              decoration: const InputDecoration(hintText: 'Full Name'),
+              decoration: const InputDecoration(hintText: AppStrings.fullNameHint),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(hintText: 'Phone'),
+              decoration: const InputDecoration(hintText: AppStrings.phoneHint),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _addressController,
               maxLines: 2,
-              decoration: const InputDecoration(hintText: 'Address'),
+              decoration: const InputDecoration(hintText: AppStrings.addressHint),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _cityController,
-              decoration: const InputDecoration(hintText: 'City'),
+              decoration: const InputDecoration(hintText: AppStrings.cityHint),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _postalCodeController,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(hintText: 'Postal Code'),
+              decoration: const InputDecoration(hintText: AppStrings.postalCodeHint),
             ),
           ],
         ),
@@ -251,11 +283,11 @@ class _ShippingAddressDialogState extends State<_ShippingAddressDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: const Text(AppStrings.cancel),
         ),
         TextButton(
           onPressed: _submit,
-          child: const Text('Place Order (COD)'),
+          child: const Text(AppStrings.placeOrderCod),
         ),
       ],
     );

@@ -1,7 +1,10 @@
+// lib/presentation/screens/categories_screen.dart
 import 'package:flutter/material.dart';
-import '../../core/di/injector.dart';
+
+import '../../core/app_navigator.dart';
+import '../../core/app_strings.dart';
+import '../state/app_controllers.dart';
 import '../widgets/category_card.dart';
-import 'category_products_screen.dart';
 
 class CategoriesScreen extends StatelessWidget {
   const CategoriesScreen({super.key});
@@ -9,7 +12,7 @@ class CategoriesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Categories')),
+      appBar: AppBar(title: const Text(AppStrings.categoriesTitle)),
       body: AnimatedBuilder(
         animation: productsController,
         builder: (context, _) {
@@ -26,9 +29,7 @@ class CategoriesScreen extends StatelessWidget {
               children: productsController.categories.map((c) {
                 return CategoryCard(
                   category: c,
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => CategoryProductsScreen(category: c)),
-                  ),
+                  onTap: () => AppNavigator.toCategoryProducts(context, category: c),
                 );
               }).toList(),
             ),

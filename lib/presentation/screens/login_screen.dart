@@ -1,9 +1,11 @@
+// lib/presentation/screens/login_screen.dart
 import 'package:flutter/material.dart';
-import '../../core/di/injector.dart';
-import '../../core/theme/app_theme.dart';
+
+import '../../core/app_colors.dart';
+import '../../core/app_navigator.dart';
+import '../../core/app_strings.dart';
+import '../state/app_controllers.dart';
 import '../widgets/app_logo.dart';
-import 'complete_profile_screen.dart';
-import 'main_shell.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -29,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text;
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your email and password')),
+        const SnackBar(content: Text(AppStrings.errorEnterEmailAndPassword)),
       );
       return;
     }
@@ -38,28 +40,21 @@ class _LoginScreenState extends State<LoginScreen> {
       final success = await authController.login(email, password);
       if (!mounted) return;
       if (success) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const MainShell()),
-          (route) => false,
-        );
+        AppNavigator.replaceWithMainShell(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(authController.errorMessage!)),
         );
       }
     } else {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => CompleteProfileScreen(email: email, password: password),
-        ),
-      );
+      AppNavigator.toCompleteProfile(context, email: email, password: password);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -69,14 +64,14 @@ class _LoginScreenState extends State<LoginScreen> {
               const AppLogo(size: 56),
               const SizedBox(height: 32),
               Text(
-                _isLoginMode ? 'Welcome Back' : 'Create Account',
+                _isLoginMode ? AppStrings.loginWelcomeBack : AppStrings.loginCreateAccount,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
                 _isLoginMode
-                    ? 'Please Enter Your Email And Password'
-                    : 'Please Enter Your Email And Choose A Password',
+                    ? AppStrings.errorEnterEmailAndPasswordLogin
+                    : AppStrings.errorEnterEmailAndChoosePassword,
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: AppColors.textSecondary),
               ),
@@ -84,13 +79,13 @@ class _LoginScreenState extends State<LoginScreen> {
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(hintText: 'Email Address'),
+                decoration: const InputDecoration(hintText: AppStrings.loginEmailHint),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _passwordController,
                 obscureText: true,
-                decoration: const InputDecoration(hintText: 'Password'),
+                decoration: const InputDecoration(hintText: AppStrings.loginPasswordHint),
               ),
               const SizedBox(height: 24),
               AnimatedBuilder(
@@ -104,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : Text(_isLoginMode ? 'Log In' : 'Next'),
+                        : Text(_isLoginMode ? AppStrings.loginButton : AppStrings.next),
                   );
                 },
               ),
@@ -112,7 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
               TextButton(
                 onPressed: () => setState(() => _isLoginMode = !_isLoginMode),
                 child: Text(
-                  _isLoginMode ? "Don't have an account? Sign Up" : 'Already have an account? Log In',
+                  _isLoginMode ? AppStrings.loginNoAccount : AppStrings.loginHaveAccount,
                 ),
               ),
             ],

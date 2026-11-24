@@ -1,13 +1,14 @@
+// lib/presentation/screens/home_screen.dart
 import 'package:flutter/material.dart';
-import '../../core/di/injector.dart';
-import '../../core/theme/app_theme.dart';
+
+import '../../core/app_colors.dart';
+import '../../core/app_navigator.dart';
+import '../../core/app_strings.dart';
 import '../../domain/entities/product.dart';
+import '../state/app_controllers.dart';
 import '../widgets/app_logo.dart';
 import '../widgets/category_card.dart';
 import '../widgets/product_card.dart';
-import 'category_products_screen.dart';
-import 'login_screen.dart';
-import 'product_details_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -16,16 +17,16 @@ class HomeScreen extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Log Out'),
-        content: const Text('Are you sure you want to log out?'),
+        title: const Text(AppStrings.logOut),
+        content: const Text(AppStrings.logOutConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
+            child: const Text(AppStrings.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Log Out'),
+            child: const Text(AppStrings.logOut),
           ),
         ],
       ),
@@ -34,10 +35,7 @@ class HomeScreen extends StatelessWidget {
 
     await authController.logout();
     if (!context.mounted) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-      (route) => false,
-    );
+    AppNavigator.replaceWithLogin(context);
   }
 
   @override
@@ -78,7 +76,7 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   ElevatedButton(
                     onPressed: productsController.load,
-                    child: const Text('Retry'),
+                    child: const Text(AppStrings.retry),
                   ),
                 ],
               ),
@@ -93,7 +91,7 @@ class HomeScreen extends StatelessWidget {
             children: [
               const TextField(
                 decoration: InputDecoration(
-                  hintText: 'Search',
+                  hintText: AppStrings.search,
                   prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
                 ),
               ),
@@ -111,9 +109,9 @@ class HomeScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            'Happy New Year\nSpecial Deal\nSave 30%',
+                            AppStrings.promoBannerText,
                             style: TextStyle(
-                              color: Colors.white,
+                              color: AppColors.white,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               height: 1.3,
@@ -122,26 +120,24 @@ class HomeScreen extends StatelessWidget {
                           const SizedBox(height: 12),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
+                              backgroundColor: AppColors.white,
                               foregroundColor: AppColors.primary,
                               minimumSize: const Size(100, 36),
                             ),
                             onPressed: () {},
-                            child: const Text('Buy Now'),
+                            child: const Text(AppStrings.buyNow),
                           ),
                         ],
                       ),
                     ),
-                    const Icon(Icons.directions_run, size: 80, color: Colors.white),
+                    const Icon(Icons.directions_run, size: 80, color: AppColors.white),
                   ],
                 ),
               ),
               const SizedBox(height: 20),
               _SectionHeader(
-                title: 'All Categories',
-                onSeeAll: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const CategoryProductsScreen(category: null)),
-                ),
+                title: AppStrings.allCategories,
+                onSeeAll: () => AppNavigator.toCategoryProducts(context),
               ),
               const SizedBox(height: 12),
               SizedBox(
@@ -155,19 +151,20 @@ class HomeScreen extends StatelessWidget {
                     return CategoryCard(
                       category: c,
                       style: CategoryCardStyle.avatar,
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => CategoryProductsScreen(category: c)),
-                      ),
+                      onTap: () => AppNavigator.toCategoryProducts(context, category: c),
                     );
                   },
                 ),
               ),
               const SizedBox(height: 24),
-              _ProductSection(title: 'Popular', products: products.take(4).toList()),
+              _ProductSection(title: AppStrings.popularSection, products: products.take(4).toList()),
               const SizedBox(height: 24),
-              _ProductSection(title: 'Special', products: products.skip(3).take(4).toList()),
+              _ProductSection(
+                title: AppStrings.specialSection,
+                products: products.skip(3).take(4).toList(),
+              ),
               const SizedBox(height: 24),
-              _ProductSection(title: 'New', products: products.skip(6).take(4).toList()),
+              _ProductSection(title: AppStrings.newSection, products: products.skip(6).take(4).toList()),
               const SizedBox(height: 16),
             ],
           );
@@ -191,7 +188,7 @@ class _SectionHeader extends StatelessWidget {
         Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         GestureDetector(
           onTap: onSeeAll,
-          child: const Text('See All', style: TextStyle(color: AppColors.primary)),
+          child: const Text(AppStrings.seeAll, style: TextStyle(color: AppColors.primary)),
         ),
       ],
     );
@@ -212,9 +209,7 @@ class _ProductSection extends StatelessWidget {
       children: [
         _SectionHeader(
           title: title,
-          onSeeAll: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const CategoryProductsScreen(category: null)),
-          ),
+          onSeeAll: () => AppNavigator.toCategoryProducts(context),
         ),
         const SizedBox(height: 12),
         SizedBox(
@@ -227,9 +222,7 @@ class _ProductSection extends StatelessWidget {
               final product = products[i];
               return ProductCard(
                 product: product,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => ProductDetailsScreen(product: product)),
-                ),
+                onTap: () => AppNavigator.toProductDetails(context, product: product),
               );
             },
           ),

@@ -1,8 +1,11 @@
+// lib/presentation/screens/category_products_screen.dart
 import 'package:flutter/material.dart';
-import '../../core/di/injector.dart' as injector;
+
+import '../../core/app_navigator.dart';
+import '../../core/app_strings.dart';
 import '../../domain/entities/category.dart';
+import '../state/app_controllers.dart';
 import '../widgets/product_grid_page.dart';
-import 'product_details_screen.dart';
 
 class CategoryProductsScreen extends StatelessWidget {
   final Category? category;
@@ -11,23 +14,22 @@ class CategoryProductsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = category?.name ?? 'All Products';
+    final title = category?.name ?? AppStrings.allProductsTitle;
 
     return Scaffold(
       appBar: AppBar(title: Text(title)),
       body: AnimatedBuilder(
-        animation: injector.productsController,
+        animation: productsController,
         builder: (context, _) {
-          final allProducts = injector.productsController.products;
+          final allProducts = productsController.products;
           final products = category == null
               ? allProducts
               : allProducts.where((p) => p.categoryIds.contains(category!.id)).toList();
 
           return ProductGridPage(
             products: products,
-            onProductTap: (product) => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => ProductDetailsScreen(product: product)),
-            ),
+            onProductTap: (product) =>
+                AppNavigator.toProductDetails(context, product: product),
           );
         },
       ),

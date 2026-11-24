@@ -1,8 +1,11 @@
+// lib/presentation/screens/complete_profile_screen.dart
 import 'package:flutter/material.dart';
-import '../../core/di/injector.dart';
-import '../../core/theme/app_theme.dart';
+
+import '../../core/app_colors.dart';
+import '../../core/app_navigator.dart';
+import '../../core/app_strings.dart';
+import '../state/app_controllers.dart';
 import '../widgets/app_logo.dart';
-import 'otp_screen.dart';
 
 class CompleteProfileScreen extends StatefulWidget {
   final String email;
@@ -32,10 +35,9 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
   }
 
   Future<void> _handleComplete() async {
-    if (_firstNameController.text.trim().isEmpty ||
-        _lastNameController.text.trim().isEmpty) {
+    if (_firstNameController.text.trim().isEmpty || _lastNameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your first and last name')),
+        const SnackBar(content: Text(AppStrings.errorEnterFirstLastName)),
       );
       return;
     }
@@ -55,9 +57,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
       final sent = await authController.sendOtp(widget.email);
       if (!mounted) return;
       if (sent) {
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => OtpScreen(email: widget.email)),
-        );
+        AppNavigator.toOtp(context, email: widget.email);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(authController.errorMessage!)),
@@ -73,7 +73,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
@@ -82,40 +82,40 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
               const AppLogo(size: 56),
               const SizedBox(height: 24),
               const Text(
-                'Complete Profile',
+                AppStrings.completeProfileTitle,
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               const Text(
-                'Get started with us with your details',
+                AppStrings.completeProfileSubtitle,
                 style: TextStyle(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 24),
               TextField(
                 controller: _firstNameController,
-                decoration: const InputDecoration(hintText: 'First Name'),
+                decoration: const InputDecoration(hintText: AppStrings.firstNameHint),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _lastNameController,
-                decoration: const InputDecoration(hintText: 'Last Name'),
+                decoration: const InputDecoration(hintText: AppStrings.lastNameHint),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(hintText: 'Mobile'),
+                decoration: const InputDecoration(hintText: AppStrings.mobileHint),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _cityController,
-                decoration: const InputDecoration(hintText: 'City'),
+                decoration: const InputDecoration(hintText: AppStrings.cityHint),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _addressController,
                 maxLines: 3,
-                decoration: const InputDecoration(hintText: 'Shipping Address'),
+                decoration: const InputDecoration(hintText: AppStrings.shippingAddressHint),
               ),
               const SizedBox(height: 24),
               AnimatedBuilder(
@@ -129,7 +129,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Complete'),
+                        : const Text(AppStrings.completeButton),
                   );
                 },
               ),
